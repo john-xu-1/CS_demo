@@ -1,1 +1,2 @@
-# CS_demo
+# LightGame
+game about light

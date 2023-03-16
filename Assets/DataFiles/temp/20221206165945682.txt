@@ -1,0 +1,109 @@
+
+
+            width (1..max_width).
+            height (1..max_height).
+
+            wall_types(empty; filled).
+            mirror_types(mirror135;mirror45).
+            apparatus_types(Type) :- mirror_types(Type).
+
+            1{tile(XX,YY,Type) : wall_types(Type)}1 :- width(XX), height(YY).
+
+            tile(1,YY, filled) :- height(YY).
+            tile(max_width,YY, filled) :- height(YY).
+            tile(XX,1, filled) :- width(XX).
+            tile(XX,max_height, filled) :- width(XX).
+
+            
+            1{mirror(XX,YY,Type)}1 :- mirror_types(Type), tile(XX+1,YY,empty), tile(XX,YY+1,empty), tile(XX,YY,empty).
+            1{mirror(XX,YY,Type)}1 :- mirror_types(Type), tile(XX-1,YY,empty), tile(XX,YY+1,empty), tile(XX,YY,empty).
+            1{mirror(XX,YY,Type)}1 :- mirror_types(Type), tile(XX+1,YY,empty), tile(XX,YY-1,empty), tile(XX,YY,empty).
+            1{mirror(XX,YY,Type)}1 :- mirror_types(Type), tile(XX-1,YY,empty), tile(XX,YY-1,empty), tile(XX,YY,empty).
+
+            %:- mirror(XX,YY,_), mirror(XX+1,YY,_).
+            %:- mirror(XX,YY,_), mirror(XX-1,YY,_).
+            %:- mirror(XX,YY,_), mirror(XX,YY+1,_).
+            %:- mirror(XX,YY,_), mirror(XX,YY-1,_).
+            
+            %end(1, max_height).
+            %start(max_width, 1).
+            1{start(XX,YY): width(XX),height(YY)}1.
+            1{end(XX,YY): width(XX),height(YY)}1.
+            
+            directions(upEmitter;rightEmitter;downEmitter;leftEmitter).
+            1{apparatus(XX,YY,Direction): directions(Direction)}1 :- start (XX,YY).
+
+            :- apparatus(XX,YY,upEmitter), not tile(XX,YY -1, filled).
+            :- apparatus(XX,YY,rightEmitter), not tile(XX -1,YY, filled).
+            :- apparatus(XX,YY,downEmitter), not tile(XX,YY +1, filled).
+            :- apparatus(XX,YY,leftEmitter), not tile(XX+1,YY, filled).
+
+            path(XX,YY,up,0,0) :- apparatus(XX,YY, upEmitter).
+            path(XX,YY,right,0,0) :- apparatus(XX,YY, rightEmitter).
+            path(XX,YY,down,0,0) :- apparatus(XX,YY, downEmitter).
+            path(XX,YY,left,0,0) :- apparatus(XX,YY, leftEmitter).
+            apparatus(XX,YY, acceptor) :- end(XX,YY).
+
+            %% none mirrored paths
+            path(XX,YY,left,Count45,Count135) :- path(XX+1,YY,left,Count45,Count135), tile(XX,YY,empty).
+            path(XX,YY,right,Count45,Count135) :- path(XX-1,YY,right,Count45,Count135), tile(XX,YY,empty).
+            path(XX,YY,down,Count45,Count135) :- path(XX,YY+1,down,Count45,Count135), tile(XX,YY,empty).
+            path(XX,YY,up,Count45,Count135) :- path(XX,YY-1,up,Count45,Count135), tile(XX,YY,empty).
+
+            %% 135 mirror path reflections
+            %path(XX,YY,right,Count45,Count135+1) :- tile(XX,YY,empty), mirror(XX-1,YY,mirror135), path(XX-1,YY+1,down,Count45,Count135), Count135 = (0..max_mirror135_count).
+            %path(XX,YY,up,Count45,Count135+1) :- tile(XX,YY,empty), mirror(XX,YY-1,mirror135), path(XX+1,YY-1,left,Count45,Count135), Count135 = (0..max_mirror135_count).    
+            %path(XX,YY,left,Count45,Count135+1) :- tile(XX,YY,empty), mirror(XX+1,YY,mirror135), path(XX+1,YY-1,up,Count45,Count135), Count135 = (0..max_mirror135_count).
+            %path(XX,YY,down,Count45,Count135+1) :- tile(XX,YY,empty), mirror(XX,YY+1,mirror135), path(XX-1,YY+1,right,Count45,Count135), Count135 = (0..max_mirror135_count).
+
+            %% 45 mirror path relections
+            %path(XX,YY,right,Count45+1,Count135) :- tile(XX,YY,empty), mirror(XX-1,YY,mirror45), path(XX-1,YY-1,up,Count45,Count135), Count45 = (0..max_mirror45_count).
+            %path(XX,YY,up,Count45+1,Count135) :- tile(XX,YY,empty), mirror(XX,YY-1,mirror45), path(XX-1,YY-1,right,Count45,Count135), Count45 = (0..max_mirror45_count).
+            %path(XX,YY,left,Count45+1,Count135) :- tile(XX,YY,empty), mirror(XX+1,YY,mirror45), path(XX+1,YY+1,down,Count45,Count135), Count45 = (0..max_mirror45_count).
+            %path(XX,YY,down,Count45+1,Count135) :- tile(XX,YY,empty), mirror(XX,YY+1,mirror45), path(XX+1,YY+1,left,Count45,Count135), Count45 = (0..max_mirror45_count).
+
+            %% 135 mirror path reflections
+            path(XX,YY,right,Count45,Count135+1) :- tile(XX,YY,empty), mirror(XX,YY,mirror135), path(XX,YY+1,down,Count45,Count135), Count135 = (0..max_mirror135_count).
+            path(XX,YY,up,Count45,Count135+1) :- tile(XX,YY,empty), mirror(XX,YY,mirror135), path(XX+1,YY,left,Count45,Count135), Count135 = (0..max_mirror135_count).    
+            path(XX,YY,left,Count45,Count135+1) :- tile(XX,YY,empty), mirror(XX,YY,mirror135), path(XX,YY-1,up,Count45,Count135), Count135 = (0..max_mirror135_count).
+            path(XX,YY,down,Count45,Count135+1) :- tile(XX,YY,empty), mirror(XX,YY,mirror135), path(XX-1,YY,right,Count45,Count135), Count135 = (0..max_mirror135_count).
+
+            %% 45 mirror path relections
+            path(XX,YY,right,Count45+1,Count135) :- tile(XX,YY,empty), mirror(XX,YY,mirror45), path(XX,YY-1,up,Count45,Count135), Count45 = (0..max_mirror45_count).
+            path(XX,YY,up,Count45+1,Count135) :- tile(XX,YY,empty), mirror(XX,YY,mirror45), path(XX-1,YY,right,Count45,Count135), Count45 = (0..max_mirror45_count).
+            path(XX,YY,left,Count45+1,Count135) :- tile(XX,YY,empty), mirror(XX,YY,mirror45), path(XX,YY+1,down,Count45,Count135), Count45 = (0..max_mirror45_count).
+            path(XX,YY,down,Count45+1,Count135) :- tile(XX,YY,empty), mirror(XX,YY,mirror45), path(XX+1,YY,left,Count45,Count135), Count45 = (0..max_mirror45_count).
+
+
+            :- end(XX,YY), tile(XX,YY,filled).
+            :- start(XX,YY), tile(XX,YY,filled).
+
+            :- end(XX,YY), mirror(XX,YY,_).
+            :- start(XX,YY), mirror(XX,YY,_).
+
+            :- end(XX,YY), path(XX,YY,_,_,Count), Count < min_mirror135_count.
+            :- end(XX,YY), path(XX,YY,_,_,Count), Count > max_mirror135_count.
+
+            :- end(XX,YY), path(XX,YY,_,Count45,_), Count45 < min_mirror45_count.
+            :- end(XX,YY), path(XX,YY,_,Count45,_), Count45 > max_mirror45_count.
+
+            :- end(XX,YY), not path(XX,YY,_,_,_).
+            %:- end(XX,YY), path(XX,YY,D1,_,_), path(XX,YY,D2,_,_), D1 == D2.
+            directions(up;right;down;left).
+            %:- end(XX,YY), Count == {path(XX,YY,DD,_,_): directions(DD) }, Count <= 1.
+
+
+            :- tile(XX,YY,empty), not path(XX,YY,_,_,_).
+
+            light_path(XX,YY,blue) :- path(XX,YY,_,_,_).
+            poi(XX,YY,end) :- end(XX,YY).
+            poi(XX,YY,start) :- start(XX,YY).
+            %poi(XX,YY,Type) :- mirror(XX,YY,Type).
+            
+
+            %:- Count = {mirror(_,_,_)}, Count > 5.
+
+            %:- path(XX,YY,_, C1,_), path(XX,YY,_,C2,_), C1 != C2.
+            %:- path(XX,YY,_,_, C1), path(XX,YY,_,_,C2), C1 != C2.
+            
+        

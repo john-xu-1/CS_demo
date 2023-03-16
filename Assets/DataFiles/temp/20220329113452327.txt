@@ -1,0 +1,25 @@
+
+
+            width (1..max_width).
+            height (1..max_height).
+
+            wall_types(empty; filled).
+
+            1{tile(XX,YY,Type) : wall_types(Type)}1 :- width(XX), height(YY).
+            
+            start(1, max_height).
+            end(max_width, 1).
+
+            path(XX,YY) :- start (XX,YY).
+
+
+            path(XX,YY) :- path(XX+1,YY).
+            path(XX,YY) :- path(XX-1,YY).
+            path(XX,YY) :- path(XX,YY+1).
+            path(XX,YY) :- path(XX,YY-1).
+
+            :- path(XX,YY), tile(XX,YY,filled).
+
+            :- end(XX,YY), not path(XX,YY).
+            
+        

@@ -1,0 +1,12 @@
+
+
+            width (1..max_width).
+            height (1..max_height).
+
+            wall_types(empty; filled).
+
+            1{tile(XX,YY,Type) : wall_types(Type)}1 :- width(XX), height(YY).
+            
+
+            
+        
